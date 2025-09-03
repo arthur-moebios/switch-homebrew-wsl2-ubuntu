@@ -42,3 +42,59 @@ See the Release notes for the exact list.
 
 1) Download the file from the **Releases** tab (e.g., `devkitpro-wsl-YYYY-MM-DD.tar.zst`).  
    If you downloaded via Windows browser, it’s likely under:
+/mnt/c/Users/YOUR_USER/Downloads/devkitpro-wsl-YYYY-MM-DD.tar.zst
+
+2) **Extract at the filesystem root `/`** (the tarball already contains `opt/devkitpro/...`):
+
+```bash
+# example path — adjust to your filename/location
+TAR="/mnt/c/Users/YOUR_USER/Downloads/devkitpro-wsl-YYYY-MM-DD.tar.zst"
+
+sudo mkdir -p /opt/devkitpro
+# For .tar.zst:
+sudo tar -I zstd -xvf "$TAR" -C /
+# For .tar.xz (alternative):
+# sudo tar -xvf "$TAR" -C /
+
+3) Add environment variables to your ~/.bashrc:
+grep -q "DEVKITPRO=/opt/devkitpro" ~/.bashrc || cat >>~/.bashrc <<'EOF'
+# devkitPro (WSL2)
+export DEVKITPRO=/opt/devkitpro
+export DEVKITARM=${DEVKITPRO}/devkitARM
+export DEVKITA64=${DEVKITPRO}/devkitA64
+export PATH=$PATH:${DEVKITPRO}/tools/bin:${DEVKITARM}/bin
+EOF
+
+# apply to current shell
+source ~/.bashrc
+4) Sanity checks:
+which aarch64-none-elf-gcc && aarch64-none-elf-gcc --version | head -n1
+which arm-none-eabi-gcc     && arm-none-eabi-gcc --version | head -n1
+which elf2nro
+test -f /opt/devkitpro/libnx/switch_rules && echo "libnx OK"
+
+## 🧪 Usage tips
+
+Build without sudo (fix project perms if needed):
+sudo chown -R "$USER":"$USER" /path/to/your/project
+cd /path/to/your/project
+make -j"$(nproc)"
+
+🧹 Uninstall
+sudo rm -rf /opt/devkitpro
+# (optional) remove the lines from ~/.bashrc
+
+🔐 Verify (optional)
+
+If a checksum is provided in the Release:
+
+sha256sum devkitpro-wsl-YYYY-MM-DD.tar.zst
+# Compare with the hash on the Release page
+
+🙏 Credits
+
+devkitPro and portlib maintainers
+
+Homebrew community
+
+This repo only ships a snapshot to speed up setup on WSL2 + Ubuntu
